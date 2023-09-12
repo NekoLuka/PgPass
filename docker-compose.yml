@@ -1,0 +1,9 @@
+version: '3.9'
+
+services:
+  pgpass:
+    build: .
+    volumes:
+      - ./cliserver_config.json:/config.json
+    ports:
+      - "9999:9999"

@@ -1,0 +1,57 @@
+{
+    "routes": {
+        "/register": {
+            "method": "POST",
+            "params": ["public-key", "id"],
+            "variables": {
+                "id-hash": "echo -n {id} | openssl dgst -binary -sha256 | base64 | tr '/+' '_-' | tr -d '=\n'"
+            },
+            "commands": [
+                {
+                    "condition": "-d /pass/{id-hash}",
+                    "command": "test -d /dev/null",
+                    "expected_return_code": 0
+                },
+                {
+                    "command": "base64 -d",
+                    "stdin": "public-key",
+                    "pipe_to_stdin": true
+                },
+                {
+                    "command": "gpg --import",
+                    "expected_return_code": 0
+                },
+                {
+                    "command": "mkdir -p /pass/{id-hash}"
+                }
+            ]
+        },
+        "/save-password": {
+            "method": "POST",
+            "params": ["id", "password", "name", "email"],
+            "variables": {
+                "id-hash": "echo -n {id} | openssl dgst -binary -sha256 | base64 | tr '/+' '_-' | tr -d '=\n'",
+                "name-hash": "echo -n {name} | openssl dgst -binary -sha256 | base64 | tr '/+' '_-' | tr -d '=\n'"
+            },
+            "commands": [
+                {
+                    "command": "gpg --trust-model always -a -e -o /pass/{id-hash}/{name-hash}.gpg -r {email}",
+                    "stdin": "password"
+                }
+            ]
+        },
+        "/get-password": {
+            "method": "GET",
+            "params": ["id", "name"],
+            "variables": {
+                "id-hash": "echo -n {id} | openssl dgst -binary -sha256 | base64 | tr '/+' '_-' | tr -d '=\n'",
+                "name-hash": "echo -n {name} | openssl dgst -binary -sha256 | base64 | tr '/+' '_-' | tr -d '=\n'"
+            },
+            "commands": [
+                {
+                    "command": "cat /pass/{id-hash}/{name-hash}.gpg"
+                }
+            ]
+        }
+    }
+}
