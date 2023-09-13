@@ -28,15 +28,20 @@
         },
         "/save-password": {
             "method": "POST",
-            "params": ["id", "password", "name", "email"],
+            "params": ["id", "password", "name", "email", "encrypted"],
             "variables": {
                 "id-hash": "echo -n {id} | openssl dgst -binary -sha256 | base64 | tr '/+' '_-' | tr -d '=\n'",
                 "name-hash": "echo -n {name} | openssl dgst -binary -sha256 | base64 | tr '/+' '_-' | tr -d '=\n'"
             },
             "commands": [
                 {
+                    "condition": "{encrypted} = false",
                     "command": "gpg --trust-model always --batch --yes -a -e -o /pass/{id-hash}/{name-hash}.gpg -r {email}",
                     "stdin": "password"
+                },
+                {
+                    "condition": "{encrypted} = true",
+                    "command":"echo -n {password} > /pass/{id-hash}/{name-hash}.gpg"
                 },
                 {
                     "command": "git -C /pass add . && git -C /pass commit -m 'added {name-hash} for {id-hash}' > /dev/null"
@@ -58,14 +63,19 @@
         },
         "/save-password-list": {
             "method": "POST",
-            "params": ["id", "password-list", "email"],
+            "params": ["id", "password-list", "email", "encrypted"],
             "variables": {
                 "id-hash": "echo -n {id} | openssl dgst -binary -sha256 | base64 | tr '/+' '_-' | tr -d '=\n'"
             },
             "commands": [
                 {
+                    "condition": "{encrypted} = false",
                     "command": "gpg --trust-model always --batch --yes -a -e -o /pass/{id-hash}/items.gpg -r {email}",
                     "stdin": "password-list"
+                },
+                {
+                    "condition": "{encrypted} = true",
+                    "command": "echo -n {password-list} > /pass/{id-hash}/items.gpg"
                 },
                 {
                     "command": "git -C /pass add . && git -C /pass commit -m 'updated password-list for {id-hash}' > /dev/null"
