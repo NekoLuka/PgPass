@@ -1,5 +1,5 @@
 # PgPass
-A password manager that encrypts passwords under the hood with pgp and your public key.
+A password manager server that encrypts passwords under the hood with pgp and your public key.
 
 ## Usage
 1. Create a PGP keypair if you haven't already.
@@ -11,3 +11,5 @@ A password manager that encrypts passwords under the hood with pgp and your publ
 - /register: POST your `public-key` and `id`
 - /save-password: POST `password`, `name`, `id` and `email` for the certificate.
 - /get-password: GET `name` and `id` for the parameters.
+- /save-password-list: POST `id`, `password-list` and `email` for the parameters.
+- /get-password-list: GET `id` for the parameter.
