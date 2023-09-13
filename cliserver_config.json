@@ -55,6 +55,34 @@
                     "command": "cat /pass/{id-hash}/{name-hash}.gpg"
                 }
             ]
+        },
+        "/save-password-list": {
+            "method": "POST",
+            "params": ["id", "password-list", "email"],
+            "variables": {
+                "id-hash": "echo -n {id} | openssl dgst -binary -sha256 | base64 | tr '/+' '_-' | tr -d '=\n'"
+            },
+            "commands": [
+                {
+                    "command": "gpg --trust-model always --batch --yes -a -e -o /pass/{id-hash}/items.gpg -r {email}",
+                    "stdin": "password-list"
+                },
+                {
+                    "command": "git -C /pass add . && git -C /pass commit -m 'updated password-list for {id-hash}' > /dev/null"
+                }
+            ]
+        },
+        "/get-password-list": {
+            "method": "GET",
+            "params": ["id"],
+            "variables": {
+                "id-hash": "echo -n {id} | openssl dgst -binary -sha256 | base64 | tr '/+' '_-' | tr -d '=\n'"
+            },
+            "commands": [
+                {
+                    "command":"cat /pass/{id-hash}/items.gpg"
+                }
+            ]
         }
     }
 }
