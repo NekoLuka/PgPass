@@ -35,8 +35,11 @@
             },
             "commands": [
                 {
-                    "command": "gpg --trust-model always -a -e -o /pass/{id-hash}/{name-hash}.gpg -r {email}",
+                    "command": "gpg --trust-model always --batch --yes -a -e -o /pass/{id-hash}/{name-hash}.gpg -r {email}",
                     "stdin": "password"
+                },
+                {
+                    "command": "git -C /pass add . && git -C /pass commit -m 'added {name-hash} for {id-hash}' > /dev/null"
                 }
             ]
         },
